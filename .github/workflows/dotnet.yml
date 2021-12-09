@@ -1,0 +1,65 @@
+name: DotnetSixProjectBuilder
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        include-prerelease: false  
+        
+    # Add NuGet Sources
+
+    - name: Create Local NuGet Directory
+      run: mkdir ~/nuget
+
+    - name: Add Local Nuget Source
+      run: dotnet nuget add source ~/nuget
+
+    - name: Add GGroupp NuGet Source
+      run: dotnet nuget add source ${{ secrets.GGROUPP_NUGET_SOURCE_URL }} -n ggroupp -u ${{ secrets.GGROUPP_NUGET_SOURCE_USER_NAME }} -p ${{ secrets.GGROUPP_NUGET_SOURCE_USER_PASSWORD }} --store-password-in-clear-text
+
+    # ChatFlow.BreakState.csproj
+
+    - name: Restore ChatFlow.BreakState.csproj
+      run: dotnet restore ./src/*/ChatFlow.BreakState.csproj
+
+    - name: Build ChatFlow.BreakState.csproj
+      run: dotnet build ./src/*/ChatFlow.BreakState.csproj --no-restore  -c Release
+
+    - name: Pack ChatFlow.BreakState.csproj
+      run: dotnet pack ./src/*/ChatFlow.BreakState.csproj --no-restore -o ~/nuget  -c Release
+
+     # ChatFlow.Jump.csproj
+  
+    - name: Restore ChatFlow.Jump.csproj
+      run: dotnet restore ./src/*/ChatFlow.Jump.csproj
+
+    - name: Build ChatFlow.Jump.csproj
+      run: dotnet build ./src/*/ChatFlow.Jump.csproj --no-restore  -c Release
+
+    - name: Pack ChatFlow.Jump.csproj
+      run: dotnet pack ./src/*/ChatFlow.Jump.csproj --no-restore -o ~/nuget  -c Release
+
+    # ChatFlow.Core.csproj
+
+    - name: Restore ChatFlow.Core.csproj
+      run: dotnet restore ./src/*/ChatFlow.Core.csproj
+
+    - name: Build ChatFlow.Core.csproj
+      run: dotnet build ./src/*/ChatFlow.Core.csproj --no-restore  -c Release
+
+    - name: Pack ChatFlow.Core.csproj
+      run: dotnet pack ./src/*/ChatFlow.Core.csproj --no-restore -o ~/nuget  -c Release
+
+    # Push
+
+    - name: Push Packages
+      if: ${{ github.ref == 'refs/heads/main' }}
+      run: dotnet nuget push "../../../nuget/*.nupkg" -s ${{ secrets.GGROUPP_NUGET_SOURCE_URL }} -k ${{ secrets.GGROUPP_NUGET_SOURCE_USER_PASSWORD }} --skip-duplicate
