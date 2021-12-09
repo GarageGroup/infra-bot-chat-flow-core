@@ -12,9 +12,9 @@ public readonly partial struct ChatFlowJump<T> : IEquatable<ChatFlowJump<T>>
 
     public ChatFlowJumpTag Tag { get; }
 
-    public ChatFlowJump(T nextValue)
+    public ChatFlowJump(T nextState)
     {
-        this.nextState = nextValue;
+        this.nextState = nextState;
         repeatState = default;
         breakState = default;
         Tag = ChatFlowJumpTag.Next;
