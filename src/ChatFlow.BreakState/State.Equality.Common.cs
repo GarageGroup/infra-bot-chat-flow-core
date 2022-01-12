@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace GGroupp.Infra.Bot.Builder;
 
@@ -9,15 +8,11 @@ partial struct ChatFlowBreakState
         =>
         typeof(ChatFlowBreakState);
 
-    private static StringComparer UIMessageComparer
+    private static StringComparer UserMessageComparer
         =>
         StringComparer.Ordinal;
 
     private static StringComparer LogMessageComparer
         =>
         StringComparer.Ordinal;
-
-    private static IEqualityComparer<ChatFlowBreakType> TypeComparer
-        =>
-        EqualityComparer<ChatFlowBreakType>.Default;
 }

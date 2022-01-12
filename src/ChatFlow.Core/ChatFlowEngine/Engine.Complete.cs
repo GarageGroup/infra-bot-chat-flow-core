@@ -8,7 +8,7 @@ namespace GGroupp.Infra.Bot.Builder;
 
 partial class ChatFlowEngine<T>
 {
-    internal async ValueTask<TurnState> InternalGetTurnStateValueAsync(CancellationToken cancellationToken)
+    internal async ValueTask<Unit> InternalCompleteValueAsync(CancellationToken cancellationToken)
     {
         var jump = await InnerGetNextAsync(GetUnitJumpAsync, cancellationToken).ConfigureAwait(false);
         if (jump.Tag is not ChatFlowJumpTag.Repeat)
@@ -16,33 +16,31 @@ partial class ChatFlowEngine<T>
             _ = await chatFlowCache.ClearPositionAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return await jump.FoldValueAsync(NextTurnStateAsync, RepeatTurnStateAsync, BreakTurnStateAsync).ConfigureAwait(false);
+        return await jump.FoldValueAsync(ToUnitAsync, ToUnitAsync, CompleteWithBreakAsync).ConfigureAwait(false);
 
         static ValueTask<ChatFlowJump<Unit>> GetUnitJumpAsync(IChatFlowContext<T> context, CancellationToken _)
             =>
             ChatFlowJump.Next(default(Unit)).InternalPipe(ValueTask.FromResult);
 
-        static ValueTask<TurnState> NextTurnStateAsync(Unit _)
+        static ValueTask<Unit> ToUnitAsync<TAny>(TAny _)
             =>
-            ValueTask.FromResult(TurnState.Completed);
+            ValueTask.FromResult(default(Unit));
 
-        static ValueTask<TurnState> RepeatTurnStateAsync(object? _)
-            =>
-            ValueTask.FromResult(TurnState.Awaiting);
-
-        async ValueTask<TurnState> BreakTurnStateAsync(ChatFlowBreakState breakState)
+        async ValueTask<Unit> CompleteWithBreakAsync(ChatFlowBreakState breakState)
         {
             if (string.IsNullOrEmpty(breakState.LogMessage) is false)
             {
-                logger.LogError(breakState.LogMessage);
+                var breakLogMessage = breakState.LogMessage;
+                logger.LogError("{logMessage}", breakLogMessage);
             }
-            if (string.IsNullOrEmpty(breakState.UIMessage) is false)
+
+            if (string.IsNullOrEmpty(breakState.UserMessage) is false)
             {
-                var breakMessage = MessageFactory.Text(breakState.UIMessage);
+                var breakMessage = MessageFactory.Text(breakState.UserMessage);
                 _ = await turnContext.SendActivityAsync(breakMessage, cancellationToken).ConfigureAwait(false);
             }
 
-            return breakState.Type is ChatFlowBreakType.Cancel ? TurnState.Canceled : TurnState.Interrupted;
+            return default;
         }
     }
 }
