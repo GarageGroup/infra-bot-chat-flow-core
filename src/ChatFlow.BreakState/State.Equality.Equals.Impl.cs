@@ -4,7 +4,6 @@ partial struct ChatFlowBreakState
 {
     public bool Equals(ChatFlowBreakState other)
         =>
-        TypeComparer.Equals(Type, other.Type) &&
-        UIMessageComparer.Equals(UIMessage, other.UIMessage) &&
+        UserMessageComparer.Equals(UserMessage, other.UserMessage) &&
         LogMessageComparer.Equals(LogMessage, other.LogMessage);
 }

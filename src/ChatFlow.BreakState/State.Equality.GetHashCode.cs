@@ -8,7 +8,6 @@ partial struct ChatFlowBreakState
         =>
         HashCode.Combine(
             EqualityContract,
-            TypeComparer.GetHashCode(Type),
-            UIMessageComparer.GetHashCode(UIMessage),
+            UserMessageComparer.GetHashCode(UserMessage),
             LogMessageComparer.GetHashCode(LogMessage));
 }
