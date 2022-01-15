@@ -45,12 +45,10 @@ internal sealed class ChatFlowCacheImpl : IChatFlowCache
         return default;
     }
 
-    public async Task<ChatFlowStepCacheJson<T>> GetStepCacheAsync<T>(CancellationToken cancellationToken)
+    public Task<ChatFlowStepCacheJson<T>> GetStepCacheAsync<T>(CancellationToken cancellationToken)
     {
-        var position = await GetPositionAsync(cancellationToken).ConfigureAwait(false);
-        var accessor = CreateStepCacheAccessor<T>(position);
-
-        return await accessor.GetAsync(turnContext, () => default, cancellationToken).ConfigureAwait(false);
+        var accessor = CreateStepCacheAccessor<T>();
+        return accessor.GetAsync(turnContext, () => default, cancellationToken);
     }
 
     public async ValueTask<Unit> ClearStepCacheAsync<T>(int position, CancellationToken cancellationToken)
@@ -61,7 +59,7 @@ internal sealed class ChatFlowCacheImpl : IChatFlowCache
             return default;
         }
 
-        var accessor = CreateStepCacheAccessor<T>(position);
+        var accessor = CreateStepCacheAccessor<T>();
 
         await accessor.DeleteAsync(turnContext, cancellationToken).ConfigureAwait(false);
         return default;
@@ -72,13 +70,13 @@ internal sealed class ChatFlowCacheImpl : IChatFlowCache
         positionCache = position;
         await positionAccessor.SetAsync(turnContext, position, cancellationToken).ConfigureAwait(false);
 
-        var accessor = CreateStepCacheAccessor<T>(position);
+        var accessor = CreateStepCacheAccessor<T>();
         await accessor.SetAsync(turnContext, cacheJson, cancellationToken).ConfigureAwait(false);
 
         return default;
     }
 
-    private IStatePropertyAccessor<ChatFlowStepCacheJson<T>> CreateStepCacheAccessor<T>(int position)
+    private IStatePropertyAccessor<ChatFlowStepCacheJson<T>> CreateStepCacheAccessor<T>()
         =>
-        conversationState.CreateProperty<ChatFlowStepCacheJson<T>>(Invariant($"__{chatFlowId}State{position}"));
+        conversationState.CreateProperty<ChatFlowStepCacheJson<T>>(Invariant($"__{chatFlowId}State"));
 }
