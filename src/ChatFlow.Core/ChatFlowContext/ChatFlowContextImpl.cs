@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -11,17 +12,25 @@ internal sealed class ChatFlowContextImpl<TFlowState> : IChatFlowContext<TFlowSt
 {
     private readonly ITurnContext sourceContext;
 
-    internal ChatFlowContextImpl(ITurnContext sourceContext, ILogger logger, TFlowState flowState, object? stepState)
+    private TelegramKeyboardRemoveRule telegramKeyboardRemoveRule;
+
+    internal ChatFlowContextImpl(
+        ITurnContext sourceContext,
+        ILogger logger,
+        TFlowState flowState,
+        object? stepState,
+        TelegramKeyboardRemoveRule telegramKeyboardRemoveRule)
     {
         this.sourceContext = sourceContext;
         Logger = logger;
         FlowState = flowState;
         StepState = stepState;
+        this.telegramKeyboardRemoveRule = telegramKeyboardRemoveRule;
     }
 
     IChatFlowContext<TResult> IChatFlowContext<TFlowState>.InternalMapFlowState<TResult>(Func<TFlowState, TResult> map)
         =>
-        new ChatFlowContextImpl<TResult>(sourceContext, Logger, map.Invoke(FlowState), StepState);
+        new ChatFlowContextImpl<TResult>(sourceContext, Logger, map.Invoke(FlowState), StepState, telegramKeyboardRemoveRule);
 
     public TFlowState FlowState { get; }
 
@@ -66,16 +75,56 @@ internal sealed class ChatFlowContextImpl<TFlowState> : IChatFlowContext<TFlowSt
         sourceContext.OnUpdateActivity(handler);
 
     public Task<ResourceResponse[]> SendActivitiesAsync(IActivity[] activities, CancellationToken cancellationToken = default)
-        =>
-        sourceContext.SendActivitiesAsync(activities, cancellationToken);
+    {
+        if (Activity.InternalIsTelegram() is false || telegramKeyboardRemoveRule is not TelegramKeyboardRemoveRule.WhenNextActivity)
+        {
+            return sourceContext.SendActivitiesAsync(activities, cancellationToken);
+        }
 
-    public Task<ResourceResponse> SendActivityAsync(string textReplyToSend, string? speak = null, string inputHint = "acceptingInput", CancellationToken cancellationToken = default)
+        if (activities is null || activities.Length is 0)
+        {
+            return sourceContext.SendActivitiesAsync(activities, cancellationToken);
+        }
+
+        telegramKeyboardRemoveRule = TelegramKeyboardRemoveRule.None;
+
+        var firstActivity = activities[0];
+        if (firstActivity is null || firstActivity.ChannelData is not null)
+        {
+            return sourceContext.SendActivitiesAsync(activities, cancellationToken);
+        }
+
+        return sourceContext.SendActivitiesAsync(activities.Select(MapActivity).ToArray(), cancellationToken);
+
+        static IActivity MapActivity(IActivity sourceActivity, int index)
+            =>
+            index is 0 ? sourceActivity.InternalSetTelegramRemoveKeyboardChannelData() : sourceActivity;
+    }
+
+    public Task<ResourceResponse> SendActivityAsync(
+        string textReplyToSend,
+        string? speak = null,
+        string inputHint = "acceptingInput",
+        CancellationToken cancellationToken = default)
         =>
         sourceContext.SendActivityAsync(textReplyToSend, speak, inputHint, cancellationToken);
 
     public Task<ResourceResponse> SendActivityAsync(IActivity activity, CancellationToken cancellationToken = default)
-        =>
-        sourceContext.SendActivityAsync(activity, cancellationToken);
+    {
+        if (Activity.InternalIsTelegram() is false || telegramKeyboardRemoveRule is not TelegramKeyboardRemoveRule.WhenNextActivity)
+        {
+            return sourceContext.SendActivityAsync(activity, cancellationToken);
+        }
+
+        telegramKeyboardRemoveRule = TelegramKeyboardRemoveRule.None;
+
+        if (activity.ChannelData is not null)
+        {
+            return sourceContext.SendActivityAsync(activity, cancellationToken);
+        }
+
+        return sourceContext.SendActivityAsync(activity.InternalSetTelegramRemoveKeyboardChannelData(), cancellationToken);
+    }
 
     public Task<ResourceResponse> UpdateActivityAsync(IActivity activity, CancellationToken cancellationToken = default)
         =>
