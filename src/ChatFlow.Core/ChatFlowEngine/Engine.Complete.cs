@@ -24,7 +24,7 @@ partial class ChatFlowEngine<T>
 
         static ValueTask<Unit> ToUnitAsync<TAny>(TAny _)
             =>
-            ValueTask.FromResult(default(Unit));
+            default;
 
         async ValueTask<Unit> CompleteWithBreakAsync(ChatFlowBreakState breakState)
         {
@@ -37,6 +37,12 @@ partial class ChatFlowEngine<T>
             if (string.IsNullOrEmpty(breakState.UserMessage) is false)
             {
                 var breakMessage = MessageFactory.Text(breakState.UserMessage);
+
+                if (turnContext.Activity.InternalIsTelegram())
+                {
+                    breakMessage.InternalSetTelegramRemoveKeyboardChannelData();
+                }
+
                 _ = await turnContext.SendActivityAsync(breakMessage, cancellationToken).ConfigureAwait(false);
             }
 

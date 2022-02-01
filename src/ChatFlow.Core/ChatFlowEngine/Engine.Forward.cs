@@ -33,7 +33,7 @@ partial class ChatFlowEngine<T>
         if (nextPosition == postionFromCache)
         {
             var cache = await chatFlowCache.GetStepCacheAsync<T>(token).ConfigureAwait(false);
-            var context = new ChatFlowContextImpl<T>(turnContext, logger, cache.FlowState!, cache.StepState);
+            var context = new ChatFlowContextImpl<T>(turnContext, logger, cache.FlowState!, cache.StepState, default);
             return await InnerGetNextJumpAsync(context).ConfigureAwait(false);
         }
 
@@ -42,7 +42,7 @@ partial class ChatFlowEngine<T>
 
         ValueTask<ChatFlowJump<TNext>> InnerNextStateAsync(T nextState)
         {
-            var context = new ChatFlowContextImpl<T>(turnContext, logger, nextState, default);
+            var context = new ChatFlowContextImpl<T>(turnContext, logger, nextState, default, TelegramKeyboardRemoveRule.WhenNextActivity);
             return InnerGetNextJumpAsync(context);
         }
 
