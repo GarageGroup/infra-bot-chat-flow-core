@@ -16,6 +16,8 @@ internal sealed partial class ChatFlowEngine<T>
 
     private readonly ITurnContext turnContext;
 
+    private readonly IBotUserProvider botUserProvider;
+
     private readonly ILogger logger;
 
     private readonly Func<CancellationToken, ValueTask<ChatFlowJump<T>>> flowStep;
@@ -25,6 +27,7 @@ internal sealed partial class ChatFlowEngine<T>
         int stepPosition,
         IChatFlowCache chatFlowCache,
         ITurnContext turnContext,
+        IBotUserProvider botUserProvider,
         ILogger logger,
         Func<CancellationToken, ValueTask<ChatFlowJump<T>>> flowStep)
     {
@@ -32,7 +35,8 @@ internal sealed partial class ChatFlowEngine<T>
         this.stepPosition = stepPosition;
         this.chatFlowCache = chatFlowCache;
         this.turnContext = turnContext;
-        this.flowStep = flowStep;
+        this.botUserProvider = botUserProvider;
         this.logger = logger;
+        this.flowStep = flowStep;
     }
 }

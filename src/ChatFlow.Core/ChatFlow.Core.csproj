@@ -8,12 +8,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RootNamespace>GGroupp.Infra.Bot.Builder</RootNamespace>
     <AssemblyName>GGroupp.Infra.Bot.Builder.ChatFlow.Core</AssemblyName>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GGroupp.Infra.Bot.Builder.ChatFlow.Jump" Version="1.1.0" />
-    <PackageReference Include="GGroupp.Infra.Bot.Builder.Core" Version="1.2.0" />
+    <PackageReference Include="GGroupp.Infra.Bot.Builder.Core" Version="1.3.0" />
   </ItemGroup>
 
 </Project>
