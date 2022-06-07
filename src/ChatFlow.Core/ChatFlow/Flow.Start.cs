@@ -1,28 +1,22 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder;
 
 namespace GGroupp.Infra.Bot.Builder;
 
 partial class ChatFlow
 {
-    public ChatFlow<T> Start<T>() where T : new()
-        =>
-        InnerStart(
-            () => new T());
-
     public ChatFlow<T> Start<T>(Func<T> initialFactory)
-        =>
-        InnerStart(
-            initialFactory ?? throw new ArgumentNullException(nameof(initialFactory)));
+    {
+        _ = initialFactory ?? throw new ArgumentNullException(nameof(initialFactory));
 
-    private ChatFlow<T> InnerStart<T>(Func<T> initialFactory)
-        =>
-        new ChatFlowEngine<T>(
-            chatFlowId: chatFlowId,
-            stepPosition: default,
-            chatFlowCache: chatFlowCache,
-            turnContext: turnContext,
-            logger: logger,
-            _ => initialFactory.Invoke().InternalPipe(ChatFlowJump<T>.Next).InternalPipe(ValueTask.FromResult))
-        .ToChatFlow();
+        return new ChatFlowEngine<T>(chatFlowId, default, chatFlowCache, turnContext, botUserProvider, logger, InitializeFlowAsync).ToChatFlow();
+
+        ValueTask<ChatFlowJump<T>> InitializeFlowAsync(CancellationToken cancellationToken)
+        {
+            botTelemetryClient.TrackDialogView(chatFlowId);
+            return initialFactory.Invoke().InternalPipe(ChatFlowJump<T>.Next).InternalPipe(ValueTask.FromResult);
+        }
+    }
 }

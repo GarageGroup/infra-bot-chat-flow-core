@@ -5,13 +5,15 @@ namespace GGroupp.Infra.Bot.Builder;
 public static class BotContextExtensions
 {
     public static ChatFlow CreateChatFlow(this IBotContext botContext, string chatFlowId)
-        =>
-        InnerCreateChatFlow(
-            botContext ?? throw new ArgumentNullException(nameof(botContext)),
-            chatFlowId ?? string.Empty);
+    {
+        _ = botContext ?? throw new ArgumentNullException(nameof(botContext));
 
-    private static ChatFlow InnerCreateChatFlow(IBotContext botContext, string chatFlowId)
-        =>
-        ChatFlow.InternalCreate(
-            botContext.TurnContext, botContext.ConversationState, botContext.LoggerFactory, chatFlowId);
+        return ChatFlow.InternalCreate(
+            botContext.TurnContext,
+            botContext.BotUserProvider,
+            botContext.ConversationState,
+            botContext.BotTelemetryClient,
+            botContext.LoggerFactory,
+            chatFlowId ?? string.Empty);
+    }
 }
