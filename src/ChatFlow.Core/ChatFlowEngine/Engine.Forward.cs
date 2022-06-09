@@ -13,18 +13,17 @@ partial class ChatFlowEngine<T>
         new(
             chatFlowId: chatFlowId,
             stepPosition: stepPosition + 1,
-            chatFlowCache: chatFlowCache,
-            turnContext: turnContext,
-            botUserProvider: botUserProvider,
-            logger: logger,
+            engineContext: engineContext,
             flowStep: token => token.IsCancellationRequested ? InnerCanceledAsync<TNext>(token) : InnerGetNextAsync(nextAsync, token));
 
     private async ValueTask<ChatFlowJump<TNext>> InnerGetNextAsync<TNext>(
         Func<IChatFlowContext<T>, CancellationToken, ValueTask<ChatFlowJump<TNext>>> nextAsync,
-        CancellationToken token)
+        CancellationToken cancellationToken)
     {
+        var instanceId = await engineContext.ChatFlowCache.GetIsntanceIdAsync(cancellationToken).ConfigureAwait(false);
+
         var nextPosition = stepPosition + 1;
-        var postionFromCache = await chatFlowCache.GetPositionAsync(token).ConfigureAwait(false);
+        var postionFromCache = await engineContext.ChatFlowCache.GetPositionAsync(cancellationToken).ConfigureAwait(false);
 
         if (nextPosition < postionFromCache)
         {
@@ -33,9 +32,15 @@ partial class ChatFlowEngine<T>
 
         if (nextPosition == postionFromCache)
         {
-            var cache = await chatFlowCache.GetStepCacheAsync<T>(token).ConfigureAwait(false);
+            var cache = await engineContext.ChatFlowCache.GetStepCacheAsync<T>(cancellationToken).ConfigureAwait(false);
+
             var context = new ChatFlowContextImpl<T>(
-                turnContext, botUserProvider, logger, cache.FlowState!, cache.StepState, default);
+                engineContext.TurnContext,
+                engineContext.BotUserProvider,
+                engineContext.Logger,
+                cache.FlowState!,
+                cache.StepState,
+                default);
 
             return await InnerGetNextJumpAsync(context).ConfigureAwait(false);
         }
@@ -46,13 +51,19 @@ partial class ChatFlowEngine<T>
         ValueTask<ChatFlowJump<TNext>> InnerNextStateAsync(T nextState)
         {
             var context = new ChatFlowContextImpl<T>(
-                turnContext, botUserProvider, logger, nextState, default, TelegramKeyboardRemoveRule.WhenNextActivity);
+                engineContext.TurnContext,
+                engineContext.BotUserProvider,
+                engineContext.Logger,
+                nextState,
+                default,
+                TelegramKeyboardRemoveRule.WhenNextActivity);
 
             return InnerGetNextJumpAsync(context);
         }
 
         async ValueTask<ChatFlowJump<TNext>> InnerGetNextJumpAsync(IChatFlowContext<T> context)
         {
+            TrackEvent(instanceId, "StepStart");
             var nextJump = await TryGetNextJumpAsync(context).ConfigureAwait(false);
 
             if (nextJump.Tag is ChatFlowJumpTag.Repeat)
@@ -62,11 +73,13 @@ partial class ChatFlowEngine<T>
                     FlowState = context.FlowState,
                     StepState = nextJump.RepeatStateOrThrow()
                 };
-                _ = await chatFlowCache.SetStepCacheAsync(nextPosition, cache, token).ConfigureAwait(false);
+                await engineContext.ChatFlowCache.SetStepCacheAsync(nextPosition, cache, cancellationToken).ConfigureAwait(false);
+                TrackEvent(instanceId, "StepToRepeat");
             }
             else
             {
-                _ = await chatFlowCache.ClearStepCacheAsync<T>(nextPosition, token).ConfigureAwait(false);
+                _ = await engineContext.ChatFlowCache.ClearStepCacheAsync<T>(nextPosition, cancellationToken).ConfigureAwait(false);
+                TrackEvent(instanceId, "StepComplete");
             }
 
             return nextJump;
@@ -76,7 +89,7 @@ partial class ChatFlowEngine<T>
         {
             try
             {
-                return await flowStep.Invoke(token).ConfigureAwait(false);
+                return await flowStep.Invoke(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -88,7 +101,7 @@ partial class ChatFlowEngine<T>
         {
             try
             {
-                return await nextAsync.Invoke(context, token).ConfigureAwait(false);
+                return await nextAsync.Invoke(context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -98,7 +111,7 @@ partial class ChatFlowEngine<T>
 
         ChatFlowBreakState BreakFromException(Exception exception)
         {
-            logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", chatFlowId);
+            engineContext.Logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", chatFlowId);
             return ChatFlowBreakState.From("Произошла непредвиденная ошибка. Обратитесь к администратору или повторите позднее");
         }
     }
