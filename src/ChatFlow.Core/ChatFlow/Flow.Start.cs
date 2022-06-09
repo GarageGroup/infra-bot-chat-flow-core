@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Bot.Builder;
 
 namespace GGroupp.Infra.Bot.Builder;
 
@@ -11,12 +10,11 @@ partial class ChatFlow
     {
         _ = initialFactory ?? throw new ArgumentNullException(nameof(initialFactory));
 
-        return new ChatFlowEngine<T>(chatFlowId, default, chatFlowCache, turnContext, botUserProvider, logger, InitializeFlowAsync).ToChatFlow();
+        var engineContext = new ChatFlowEngineContext(chatFlowCache, turnContext, botUserProvider, botTelemetryClient, logger);
+        return new ChatFlowEngine<T>(chatFlowId, default, engineContext, InitializeFlowAsync).ToChatFlow();
 
         ValueTask<ChatFlowJump<T>> InitializeFlowAsync(CancellationToken cancellationToken)
-        {
-            botTelemetryClient.TrackDialogView(chatFlowId);
-            return initialFactory.Invoke().InternalPipe(ChatFlowJump<T>.Next).InternalPipe(ValueTask.FromResult);
-        }
+            =>
+            initialFactory.Invoke().InternalPipe(ChatFlowJump<T>.Next).InternalPipe(ValueTask.FromResult);
     }
 }
