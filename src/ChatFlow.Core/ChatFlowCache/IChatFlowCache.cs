@@ -6,9 +6,9 @@ namespace GGroupp.Infra.Bot.Builder;
 
 internal interface IChatFlowCache
 {
-    ValueTask<Guid> GetIsntanceIdAsync(CancellationToken cancellationToken);
+    ValueTask<Guid> GetInstanceIdAsync(CancellationToken cancellationToken);
 
-    Task ClearIsntanceIdAsync(CancellationToken cancellationToken);
+    Task ClearInstanceIdAsync(CancellationToken cancellationToken);
 
     ValueTask<int> GetPositionAsync(CancellationToken cancellationToken);
 

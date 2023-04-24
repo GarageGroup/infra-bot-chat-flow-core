@@ -7,8 +7,6 @@ namespace GGroupp.Infra.Bot.Builder;
 
 internal sealed partial class ChatFlowEngine<T>
 {
-    private readonly string chatFlowId;
-
     private readonly int stepPosition;
 
     private readonly IChatFlowEngineContext engineContext;
@@ -16,14 +14,12 @@ internal sealed partial class ChatFlowEngine<T>
     private readonly Func<CancellationToken, ValueTask<ChatFlowJump<T>>> flowStep;
 
     internal ChatFlowEngine(
-        string chatFlowId,
-        int stepPosition,
         IChatFlowEngineContext engineContext,
+        int stepPosition,
         Func<CancellationToken, ValueTask<ChatFlowJump<T>>> flowStep)
     {
-        this.chatFlowId = chatFlowId;
-        this.stepPosition = stepPosition;
         this.engineContext = engineContext;
+        this.stepPosition = stepPosition;
         this.flowStep = flowStep;
     }
 
@@ -31,7 +27,7 @@ internal sealed partial class ChatFlowEngine<T>
     {
         var properties = new Dictionary<string, string>
         {
-            { "FlowId", chatFlowId },
+            { "FlowId", engineContext.ChatFlowId },
             { "InstanceId", instanceId.ToString() },
             { "StepPosition", stepPosition.ToString() }
         };
@@ -41,6 +37,6 @@ internal sealed partial class ChatFlowEngine<T>
             properties.Add("Message", message);
         }
 
-        engineContext.BotTelemetryClient.TrackEvent(chatFlowId + eventName, properties);
+        engineContext.BotTelemetryClient.TrackEvent(engineContext.ChatFlowId + eventName, properties);
     }
 }

@@ -5,19 +5,23 @@ namespace GGroupp.Infra.Bot.Builder;
 
 internal sealed class ChatFlowEngineContext : IChatFlowEngineContext
 {
-    public ChatFlowEngineContext(
+    internal ChatFlowEngineContext(
+        string chatFlowId,
         IChatFlowCache chatFlowCache,
         ITurnContext turnContext,
         IBotUserProvider botUserProvider,
         IBotTelemetryClient botTelemetryClient,
         ILogger logger)
     {
+        ChatFlowId = chatFlowId;
         ChatFlowCache = chatFlowCache;
         TurnContext = turnContext;
         BotUserProvider = botUserProvider;
         BotTelemetryClient = botTelemetryClient;
         Logger = logger;
     }
+
+    public string ChatFlowId { get; }
 
     public IChatFlowCache ChatFlowCache { get; }
 

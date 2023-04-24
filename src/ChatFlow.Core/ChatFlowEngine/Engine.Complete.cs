@@ -10,15 +10,15 @@ partial class ChatFlowEngine<T>
 {
     internal async ValueTask<Unit> InternalCompleteValueAsync(CancellationToken cancellationToken)
     {
-        var instanceId = await engineContext.ChatFlowCache.GetIsntanceIdAsync(cancellationToken).ConfigureAwait(false);
+        var instanceId = await engineContext.ChatFlowCache.GetInstanceIdAsync(cancellationToken).ConfigureAwait(false);
         var jump = await InnerGetNextAsync(GetUnitJumpAsync, cancellationToken).ConfigureAwait(false);
 
         if (jump.Tag is not ChatFlowJumpTag.Repeat)
         {
             var clearPositionTask = engineContext.ChatFlowCache.ClearPositionAsync(cancellationToken);
-            var clearIsntanceIdTask = engineContext.ChatFlowCache.ClearIsntanceIdAsync(cancellationToken);
+            var clearInstanceIdTask = engineContext.ChatFlowCache.ClearInstanceIdAsync(cancellationToken);
 
-            await Task.WhenAll(clearIsntanceIdTask, clearPositionTask).ConfigureAwait(false);
+            await Task.WhenAll(clearInstanceIdTask, clearPositionTask).ConfigureAwait(false);
         }
 
         return await jump.FoldValueAsync(ToSuccessAsync, ToRepeatAsync, ToBreakAsync).ConfigureAwait(false);

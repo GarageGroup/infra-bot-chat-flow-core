@@ -15,16 +15,20 @@ internal sealed class ChatFlowContextImpl<TFlowState> : IChatFlowContext<TFlowSt
     private TelegramKeyboardRemoveRule telegramKeyboardRemoveRule;
 
     internal ChatFlowContextImpl(
+        string chatFlowId,
         ITurnContext sourceContext,
         IBotUserProvider botUserProvider,
         ILogger logger,
+        IBotTelemetryClient botTelemetryClient,
         TFlowState flowState,
         object? stepState,
         TelegramKeyboardRemoveRule telegramKeyboardRemoveRule)
     {
+        ChatFlowId = chatFlowId ?? string.Empty;
         this.sourceContext = sourceContext;
         BotUserProvider = botUserProvider;
         Logger = logger;
+        BotTelemetryClient = botTelemetryClient;
         FlowState = flowState;
         StepState = stepState;
         this.telegramKeyboardRemoveRule = telegramKeyboardRemoveRule;
@@ -32,7 +36,10 @@ internal sealed class ChatFlowContextImpl<TFlowState> : IChatFlowContext<TFlowSt
 
     IChatFlowContext<TResult> IChatFlowContext<TFlowState>.InternalMapFlowState<TResult>(Func<TFlowState, TResult> map)
         =>
-        new ChatFlowContextImpl<TResult>(sourceContext, BotUserProvider, Logger, map.Invoke(FlowState), StepState, telegramKeyboardRemoveRule);
+        new ChatFlowContextImpl<TResult>(
+            ChatFlowId, sourceContext, BotUserProvider, Logger, BotTelemetryClient, map.Invoke(FlowState), StepState, telegramKeyboardRemoveRule);
+
+    public string ChatFlowId { get; }
 
     public TFlowState FlowState { get; }
 
@@ -57,6 +64,8 @@ internal sealed class ChatFlowContextImpl<TFlowState> : IChatFlowContext<TFlowSt
     public IBotUserProvider BotUserProvider { get; }
 
     public ILogger Logger { get; }
+
+    public IBotTelemetryClient BotTelemetryClient { get; }
 
     public Task DeleteActivityAsync(string activityId, CancellationToken cancellationToken = default)
         =>
