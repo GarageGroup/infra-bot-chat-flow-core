@@ -27,7 +27,7 @@ internal sealed partial class ChatFlowEngine<T>
         this.flowStep = flowStep;
     }
 
-    private void TrackEvent(Guid instanceId, string eventName)
+    private void TrackEvent(Guid instanceId, string eventName, string? message = null)
     {
         var properties = new Dictionary<string, string>
         {
@@ -35,6 +35,11 @@ internal sealed partial class ChatFlowEngine<T>
             { "InstanceId", instanceId.ToString() },
             { "StepPosition", stepPosition.ToString() }
         };
+
+        if (string.IsNullOrEmpty(message) is false)
+        {
+            properties.Add("Message", message);
+        }
 
         engineContext.BotTelemetryClient.TrackEvent(chatFlowId + eventName, properties);
     }

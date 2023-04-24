@@ -57,7 +57,7 @@ partial class ChatFlowEngine<T>
                 _ = await engineContext.TurnContext.SendActivityAsync(breakMessage, cancellationToken).ConfigureAwait(false);
             }
 
-            TrackEvent(instanceId, "Break");
+            TrackEvent(instanceId, "Break", breakState.LogMessage);
             return default;
         }
     }
