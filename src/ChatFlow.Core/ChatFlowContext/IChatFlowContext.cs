@@ -4,6 +4,8 @@ namespace GGroupp.Infra.Bot.Builder;
 
 public interface IChatFlowContext<T> : IFlowStateSupplier<T>, IChatFlowStepContext
 {
+    string ChatFlowId { get; }
+
     public IChatFlowContext<TResult> MapFlowState<TResult>(Func<T, TResult> mapFlowState)
         =>
         InternalMapFlowState(

@@ -5,6 +5,8 @@ namespace GGroupp.Infra.Bot.Builder;
 
 internal interface IChatFlowEngineContext
 {
+    string ChatFlowId { get; }
+
     IChatFlowCache ChatFlowCache { get; }
 
     ITurnContext TurnContext { get; }

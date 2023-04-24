@@ -33,17 +33,13 @@ internal sealed class ChatFlowCacheImpl : IChatFlowCache
         positionAccessor = conversationState.CreateProperty<int>($"__{chatFlowId}Position");
     }
 
-    public async ValueTask<Guid> GetIsntanceIdAsync(CancellationToken cancellationToken)
+    public async ValueTask<Guid> GetInstanceIdAsync(CancellationToken cancellationToken)
     {
-        if (instanceIdCache is null)
-        {
-            instanceIdCache = await instanceIdAccessor.GetAsync(turnContext, Guid.NewGuid, cancellationToken).ConfigureAwait(false);
-        }
-
+        instanceIdCache ??= await instanceIdAccessor.GetAsync(turnContext, Guid.NewGuid, cancellationToken).ConfigureAwait(false);
         return instanceIdCache.Value;
     }
 
-    public Task ClearIsntanceIdAsync(CancellationToken cancellationToken)
+    public Task ClearInstanceIdAsync(CancellationToken cancellationToken)
     {
         instanceIdCache = null;
         return instanceIdAccessor.DeleteAsync(turnContext, cancellationToken);
@@ -51,11 +47,7 @@ internal sealed class ChatFlowCacheImpl : IChatFlowCache
 
     public async ValueTask<int> GetPositionAsync(CancellationToken cancellationToken)
     {
-        if (positionCache is null)
-        {
-            positionCache = await positionAccessor.GetAsync(turnContext, GetDefaultPosition, cancellationToken).ConfigureAwait(false);
-        }
-
+        positionCache ??= await positionAccessor.GetAsync(turnContext, GetDefaultPosition, cancellationToken).ConfigureAwait(false);
         return positionCache.Value;
 
         static int GetDefaultPosition() => DefaultPosition;

@@ -11,16 +11,15 @@ partial class ChatFlowEngine<T>
         Func<IChatFlowContext<T>, CancellationToken, ValueTask<ChatFlowJump<TNext>>> nextAsync)
         =>
         new(
-            chatFlowId: chatFlowId,
-            stepPosition: stepPosition + 1,
             engineContext: engineContext,
+            stepPosition: stepPosition + 1,
             flowStep: token => token.IsCancellationRequested ? InnerCanceledAsync<TNext>(token) : InnerGetNextAsync(nextAsync, token));
 
     private async ValueTask<ChatFlowJump<TNext>> InnerGetNextAsync<TNext>(
         Func<IChatFlowContext<T>, CancellationToken, ValueTask<ChatFlowJump<TNext>>> nextAsync,
         CancellationToken cancellationToken)
     {
-        var instanceId = await engineContext.ChatFlowCache.GetIsntanceIdAsync(cancellationToken).ConfigureAwait(false);
+        var instanceId = await engineContext.ChatFlowCache.GetInstanceIdAsync(cancellationToken).ConfigureAwait(false);
 
         var nextPosition = stepPosition + 1;
         var postionFromCache = await engineContext.ChatFlowCache.GetPositionAsync(cancellationToken).ConfigureAwait(false);
@@ -35,9 +34,11 @@ partial class ChatFlowEngine<T>
             var cache = await engineContext.ChatFlowCache.GetStepCacheAsync<T>(cancellationToken).ConfigureAwait(false);
 
             var context = new ChatFlowContextImpl<T>(
+                engineContext.ChatFlowId,
                 engineContext.TurnContext,
                 engineContext.BotUserProvider,
                 engineContext.Logger,
+                engineContext.BotTelemetryClient,
                 cache.FlowState!,
                 cache.StepState,
                 default);
@@ -51,9 +52,11 @@ partial class ChatFlowEngine<T>
         ValueTask<ChatFlowJump<TNext>> InnerNextStateAsync(T nextState)
         {
             var context = new ChatFlowContextImpl<T>(
+                engineContext.ChatFlowId,
                 engineContext.TurnContext,
                 engineContext.BotUserProvider,
                 engineContext.Logger,
+                engineContext.BotTelemetryClient,
                 nextState,
                 default,
                 TelegramKeyboardRemoveRule.WhenNextActivity);
@@ -111,7 +114,7 @@ partial class ChatFlowEngine<T>
 
         ChatFlowBreakState BreakFromException(Exception exception)
         {
-            engineContext.Logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", chatFlowId);
+            engineContext.Logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", engineContext.ChatFlowId);
             return ChatFlowBreakState.From(
                 "Произошла непредвиденная ошибка. Обратитесь к администратору или повторите позднее",
                 $"An unexpected exception {exception.GetType().FullName} was thrown: {exception.Message}");

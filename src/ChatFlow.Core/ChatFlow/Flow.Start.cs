@@ -8,10 +8,10 @@ partial class ChatFlow
 {
     public ChatFlow<T> Start<T>(Func<T> initialFactory)
     {
-        _ = initialFactory ?? throw new ArgumentNullException(nameof(initialFactory));
+        ArgumentNullException.ThrowIfNull(initialFactory);
 
-        var engineContext = new ChatFlowEngineContext(chatFlowCache, turnContext, botUserProvider, botTelemetryClient, logger);
-        return new ChatFlowEngine<T>(chatFlowId, default, engineContext, InitializeFlowAsync).ToChatFlow();
+        var engineContext = new ChatFlowEngineContext(chatFlowId, chatFlowCache, turnContext, botUserProvider, botTelemetryClient, logger);
+        return new ChatFlowEngine<T>(engineContext, default, InitializeFlowAsync).ToChatFlow();
 
         ValueTask<ChatFlowJump<T>> InitializeFlowAsync(CancellationToken cancellationToken)
             =>
