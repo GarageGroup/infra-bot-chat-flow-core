@@ -112,7 +112,9 @@ partial class ChatFlowEngine<T>
         ChatFlowBreakState BreakFromException(Exception exception)
         {
             engineContext.Logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", chatFlowId);
-            return ChatFlowBreakState.From("Произошла непредвиденная ошибка. Обратитесь к администратору или повторите позднее");
+            return ChatFlowBreakState.From(
+                "Произошла непредвиденная ошибка. Обратитесь к администратору или повторите позднее",
+                $"An unexpected exception {exception.GetType().FullName} was thrown: {exception.Message}");
         }
     }
 
