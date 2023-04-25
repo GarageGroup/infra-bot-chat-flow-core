@@ -21,17 +21,11 @@ partial class ChatFlowEngine<T>
             await Task.WhenAll(clearInstanceIdTask, clearPositionTask).ConfigureAwait(false);
         }
 
-        return await jump.FoldValueAsync(ToSuccessAsync, ToRepeatAsync, ToBreakAsync).ConfigureAwait(false);
+        return await jump.FoldValueAsync(ValueTask.FromResult, ToRepeatAsync, ToBreakAsync).ConfigureAwait(false);
 
         static ValueTask<ChatFlowJump<Unit>> GetUnitJumpAsync(IChatFlowContext<T> context, CancellationToken _)
             =>
             ChatFlowJump.Next(default(Unit)).InternalPipe(ValueTask.FromResult);
-
-        ValueTask<Unit> ToSuccessAsync(Unit success)
-        {
-            TrackEvent(instanceId, "Complete");
-            return new(success);
-        }
 
         static ValueTask<Unit> ToRepeatAsync(object? _)
             =>
