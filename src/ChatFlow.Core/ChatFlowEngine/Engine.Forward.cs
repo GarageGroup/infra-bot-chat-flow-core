@@ -66,7 +66,6 @@ partial class ChatFlowEngine<T>
 
         async ValueTask<ChatFlowJump<TNext>> InnerGetNextJumpAsync(IChatFlowContext<T> context)
         {
-            TrackEvent(instanceId, "StepStart");
             var nextJump = await TryGetNextJumpAsync(context).ConfigureAwait(false);
 
             if (nextJump.Tag is ChatFlowJumpTag.Repeat)
@@ -77,12 +76,10 @@ partial class ChatFlowEngine<T>
                     StepState = nextJump.RepeatStateOrThrow()
                 };
                 await engineContext.ChatFlowCache.SetStepCacheAsync(nextPosition, cache, cancellationToken).ConfigureAwait(false);
-                TrackEvent(instanceId, "StepToRepeat");
             }
             else
             {
                 _ = await engineContext.ChatFlowCache.ClearStepCacheAsync<T>(nextPosition, cancellationToken).ConfigureAwait(false);
-                TrackEvent(instanceId, "StepComplete");
             }
 
             return nextJump;
