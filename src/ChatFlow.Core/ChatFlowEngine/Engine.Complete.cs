@@ -35,8 +35,8 @@ partial class ChatFlowEngine<T>
         {
             if (string.IsNullOrEmpty(breakState.LogMessage) is false)
             {
-                var breakLogMessage = breakState.LogMessage;
-                engineContext.Logger.LogError("{logMessage}", breakLogMessage);
+                TrackEvent(instanceId, "Break", breakState.LogMessage);
+                engineContext.Logger.LogError("{logMessage}", breakState.LogMessage);
             }
 
             if (string.IsNullOrEmpty(breakState.UserMessage) is false)
@@ -51,7 +51,6 @@ partial class ChatFlowEngine<T>
                 _ = await engineContext.TurnContext.SendActivityAsync(breakMessage, cancellationToken).ConfigureAwait(false);
             }
 
-            TrackEvent(instanceId, "Break", breakState.LogMessage);
             return default;
         }
     }
