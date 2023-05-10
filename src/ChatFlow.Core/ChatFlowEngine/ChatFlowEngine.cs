@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GGroupp.Infra.Bot.Builder;
+namespace GarageGroup.Infra.Bot.Builder;
 
 internal sealed partial class ChatFlowEngine<T>
 {
@@ -27,11 +27,11 @@ internal sealed partial class ChatFlowEngine<T>
     {
         var properties = new Dictionary<string, string>
         {
-            ["FlowId"] = engineContext.ChatFlowId,
-            ["InstanceId"] = instanceId.ToString(),
-            ["StepPosition"] = stepPosition.ToString(),
-            ["Event"] = eventName,
-            ["Message"] = message
+            ["flowId"] = engineContext.ChatFlowId,
+            ["instanceId"] = instanceId.ToString(),
+            ["stepPosition"] = stepPosition.ToString(),
+            ["event"] = eventName,
+            ["message"] = message
         };
 
         engineContext.BotTelemetryClient.TrackEvent(engineContext.ChatFlowId + eventName, properties);
