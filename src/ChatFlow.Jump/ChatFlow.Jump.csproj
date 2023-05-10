@@ -6,13 +6,13 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <RootNamespace>GGroupp.Infra.Bot.Builder</RootNamespace>
-    <AssemblyName>GGroupp.Infra.Bot.Builder.ChatFlow.Jump</AssemblyName>
-    <Version>1.1.1</Version>
+    <RootNamespace>GarageGroup.Infra.Bot.Builder</RootNamespace>
+    <AssemblyName>GarageGroup.Infra.Bot.Builder.ChatFlow.Jump</AssemblyName>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GGroupp.Infra.Bot.Builder.ChatFlow.BreakState" Version="1.1.1" />
+    <PackageReference Include="GarageGroup.Infra.Bot.Builder.ChatFlow.BreakState" Version="0.0.1" />
   </ItemGroup>
 
 </Project>

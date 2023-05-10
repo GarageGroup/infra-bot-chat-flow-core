@@ -1,7 +1,7 @@
 ﻿using System;
 using static System.FormattableString;
 
-namespace GGroupp.Infra.Bot.Builder;
+namespace GarageGroup.Infra.Bot.Builder;
 
 partial struct ChatFlowJump<T>
 {

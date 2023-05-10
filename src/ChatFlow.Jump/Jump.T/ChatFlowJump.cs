@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GGroupp.Infra.Bot.Builder;
+namespace GarageGroup.Infra.Bot.Builder;
 
 public readonly partial struct ChatFlowJump<T> : IEquatable<ChatFlowJump<T>>
 {

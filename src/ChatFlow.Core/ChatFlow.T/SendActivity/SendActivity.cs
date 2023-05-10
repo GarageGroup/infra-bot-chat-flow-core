@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Bot.Schema;
 
-namespace GGroupp.Infra.Bot.Builder;
+namespace GarageGroup.Infra.Bot.Builder;
 
 partial class ChatFlow<T>
 {
