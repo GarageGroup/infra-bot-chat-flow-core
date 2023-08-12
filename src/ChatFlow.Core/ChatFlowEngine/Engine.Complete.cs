@@ -33,10 +33,10 @@ partial class ChatFlowEngine<T>
 
         async ValueTask<Unit> ToBreakAsync(ChatFlowBreakState breakState)
         {
-            if (string.IsNullOrEmpty(breakState.LogMessage) is false)
+            if (string.IsNullOrEmpty(breakState.LogMessage) is false || breakState.SourceException is not null)
             {
-                TrackEvent(instanceId, "Break", breakState.LogMessage);
-                engineContext.Logger.LogError("{logMessage}", breakState.LogMessage);
+                TrackEvent(instanceId, "Break", breakState.LogMessage, breakState.SourceException);
+                engineContext.Logger.LogError(breakState.SourceException, "{logMessage}", breakState.LogMessage);
             }
 
             if (string.IsNullOrEmpty(breakState.UserMessage) is false)

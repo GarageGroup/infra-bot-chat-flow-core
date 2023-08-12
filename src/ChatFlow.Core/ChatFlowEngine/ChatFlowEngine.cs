@@ -23,7 +23,7 @@ internal sealed partial class ChatFlowEngine<T>
         this.flowStep = flowStep;
     }
 
-    private void TrackEvent(Guid instanceId, string eventName, string message)
+    private void TrackEvent(Guid instanceId, string eventName, string message, Exception? sourceException)
     {
         var properties = new Dictionary<string, string>
         {
@@ -33,6 +33,13 @@ internal sealed partial class ChatFlowEngine<T>
             ["event"] = eventName,
             ["message"] = message
         };
+
+        if (sourceException is not null)
+        {
+            properties["errorMessage"] = sourceException.Message ?? string.Empty;
+            properties["errorType"] = sourceException.GetType().FullName ?? string.Empty;
+            properties["stackTrace"] = sourceException.StackTrace ?? string.Empty;
+        }
 
         engineContext.BotTelemetryClient.TrackEvent(engineContext.ChatFlowId + eventName, properties);
     }

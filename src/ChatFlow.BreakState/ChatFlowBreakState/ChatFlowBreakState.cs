@@ -19,6 +19,8 @@ public readonly partial struct ChatFlowBreakState : IEquatable<ChatFlowBreakStat
 
     public string LogMessage => logMessage ?? string.Empty;
 
+    public Exception? SourceException { get; init; } = null;
+
     private static string? NullIfEmpty(string? source)
         =>
         string.IsNullOrEmpty(source) ? default : source;
