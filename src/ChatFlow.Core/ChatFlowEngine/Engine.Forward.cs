@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace GarageGroup.Infra.Bot.Builder;
 
@@ -109,13 +108,11 @@ partial class ChatFlowEngine<T>
             }
         }
 
-        ChatFlowBreakState BreakFromException(Exception exception)
-        {
-            engineContext.Logger.LogError(exception, "An unexpected exception was thrown in the chat flow {chatFlowId}", engineContext.ChatFlowId);
-            return ChatFlowBreakState.From(
-                "Произошла непредвиденная ошибка. Обратитесь к администратору или повторите позднее",
+        static ChatFlowBreakState BreakFromException(Exception exception)
+            =>
+            exception.ToChatFlowBreakState(
+                "An unexpected error has occurred. Contact your administrator or try again later",
                 $"An unexpected exception {exception.GetType().FullName} was thrown: {exception.Message}");
-        }
     }
 
     private static ValueTask<ChatFlowJump<TNext>> InnerCanceledAsync<TNext>(CancellationToken token)
