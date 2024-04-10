@@ -2,5 +2,7 @@
 
 partial struct ChatFlowJump<T>
 {
-    public static ChatFlowJump<T> Next(T nextState) => new(nextState);
+    public static ChatFlowJump<T> Next(T nextState)
+        =>
+        new(nextState);
 }

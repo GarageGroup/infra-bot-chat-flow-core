@@ -11,6 +11,6 @@ partial class ChatFlow<T>
 
     private ChatFlow<TNext> InnerMapFlowState<TNext>(Func<T, TNext> mapFlowState)
         =>
-        InnerNext<TNext>(
+        InnerNext(
             context => mapFlowState.Invoke(context.FlowState));
 }

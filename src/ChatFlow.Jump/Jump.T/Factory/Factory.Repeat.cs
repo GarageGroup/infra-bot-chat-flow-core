@@ -2,5 +2,7 @@
 
 partial struct ChatFlowJump<T>
 {
-    public static ChatFlowJump<T> Repeat(object? repeatState) => new(repeatState);
+    public static ChatFlowJump<T> Repeat(object? repeatState)
+        =>
+        new(repeatState);
 }

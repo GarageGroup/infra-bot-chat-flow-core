@@ -2,5 +2,7 @@
 
 partial class ChatFlowEngine<T>
 {
-    public ChatFlow<T> ToChatFlow() => new(this);
+    public ChatFlow<T> ToChatFlow()
+        =>
+        new(this);
 }

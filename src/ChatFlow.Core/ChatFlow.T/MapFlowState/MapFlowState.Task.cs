@@ -13,6 +13,6 @@ partial class ChatFlow<T>
 
     private ChatFlow<TNext> InnerMapFlowState<TNext>(Func<T, CancellationToken, Task<TNext>> mapFlowStateAsync)
         =>
-        InnerNext<TNext>(
+        InnerNext(
             (context, token) => mapFlowStateAsync.Invoke(context.FlowState, token));
 }
