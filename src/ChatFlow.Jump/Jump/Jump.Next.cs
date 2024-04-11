@@ -4,5 +4,5 @@ partial class ChatFlowJump
 {
     public static ChatFlowJump<T> Next<T>(T nextState)
         =>
-        new(nextState);
+        new(nextState, restart: false);
 }

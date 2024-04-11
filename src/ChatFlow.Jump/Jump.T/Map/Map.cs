@@ -4,25 +4,29 @@ namespace GarageGroup.Infra.Bot.Builder;
 
 partial struct ChatFlowJump<T>
 {
-    public ChatFlowJump<TResult> Map<TResult>(
-        Func<T, TResult> mapNextState,
-        Func<object?, object?> mapRepeatState,
-        Func<ChatFlowBreakState, ChatFlowBreakState> mapBreakState)
+    public ChatFlowJump<T> Map(
+        Func<T, T> mapNextState,
+        Func<T, T>? mapRestartState = null,
+        Func<object?, object?>? mapRepeatState = null,
+        Func<ChatFlowBreakState, ChatFlowBreakState>? mapBreakState = null)
         =>
         InnerMap(
             mapNextState ?? throw new ArgumentNullException(nameof(mapNextState)),
-            mapRepeatState ?? throw new ArgumentNullException(nameof(mapRepeatState)),
-            mapBreakState ?? throw new ArgumentNullException(nameof(mapBreakState)));
+            mapRestartState,
+            mapRepeatState,
+            mapBreakState);
 
-    private ChatFlowJump<TResult> InnerMap<TResult>(
-        Func<T, TResult> mapNextState,
-        Func<object?, object?> mapRepeatState,
-        Func<ChatFlowBreakState, ChatFlowBreakState> mapBreakState)
+    private ChatFlowJump<T> InnerMap(
+        Func<T, T> mapNextState,
+        Func<T, T>? mapRestartState,
+        Func<object?, object?>? mapRepeatState,
+        Func<ChatFlowBreakState, ChatFlowBreakState>? mapBreakState)
         =>
         Tag switch
         {
             ChatFlowJumpTag.Next => new(mapNextState.Invoke(nextState)),
-            ChatFlowJumpTag.Repeat => new(mapRepeatState.Invoke(repeatState)),
-            _ => new(mapBreakState.Invoke(breakState))
+            ChatFlowJumpTag.Restart => mapRestartState is null ? this : new(mapRestartState.Invoke(nextState), restart: true),
+            ChatFlowJumpTag.Repeat => mapRepeatState is null ? this : new(mapRepeatState.Invoke(repeatState)),
+            _ => mapBreakState is null ? this : new(mapBreakState.Invoke(breakState))
         };
 }

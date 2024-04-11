@@ -12,12 +12,16 @@ public readonly partial struct ChatFlowJump<T> : IEquatable<ChatFlowJump<T>>
 
     public ChatFlowJumpTag Tag { get; }
 
-    public ChatFlowJump(T nextState)
+    public ChatFlowJump(T nextState) : this(nextState: nextState, restart: false)
+    {
+    }
+
+    public ChatFlowJump(T nextState, bool restart)
     {
         this.nextState = nextState;
         repeatState = default;
         breakState = default;
-        Tag = ChatFlowJumpTag.Next;
+        Tag = restart ? ChatFlowJumpTag.Restart : ChatFlowJumpTag.Next;
     }
 
     public ChatFlowJump(object? repeatState)

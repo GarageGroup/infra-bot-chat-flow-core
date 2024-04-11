@@ -4,19 +4,18 @@ namespace GarageGroup.Infra.Bot.Builder;
 
 partial struct ChatFlowJump<T>
 {
-    public ChatFlowJump<TNextState> Forward<TNextState>(
-        Func<T, ChatFlowJump<TNextState>> next)
+    public ChatFlowJump<T> Forward(
+        Func<T, ChatFlowJump<T>> next)
         =>
         InnerForward(
             next ?? throw new ArgumentNullException(nameof(next)));
 
-    private ChatFlowJump<TNextState> InnerForward<TNextState>(
-        Func<T, ChatFlowJump<TNextState>> next)
+    private ChatFlowJump<T> InnerForward(
+        Func<T, ChatFlowJump<T>> next)
         =>
         Tag switch
         {
             ChatFlowJumpTag.Next => next.Invoke(nextState),
-            ChatFlowJumpTag.Repeat => new(repeatState),
-            _ => new(breakState)
+            _ => this
         };
 }

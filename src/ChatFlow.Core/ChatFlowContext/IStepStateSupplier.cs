@@ -2,15 +2,15 @@ using System;
 
 namespace GarageGroup.Infra.Bot.Builder;
 
-public interface IStepStateSupplier
+public interface IStepStateSupplier<TFlowState>
 {
     public object? StepState { get; }
 
-    public ChatFlowJump<TNext> RepeatSameStateJump<TNext>()
+    public ChatFlowJump<TFlowState> RepeatSameStateJump()
         =>
         new(StepState);
 
-    public ChatFlowJump<TNext> RepeatSameStateJump<TNext>(Unit _)
+    public ChatFlowJump<TFlowState> RepeatSameStateJump(Unit _)
         =>
         new(StepState);
 }

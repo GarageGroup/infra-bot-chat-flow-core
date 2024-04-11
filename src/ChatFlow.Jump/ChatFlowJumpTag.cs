@@ -6,5 +6,7 @@ public enum ChatFlowJumpTag
 
     Repeat,
 
-    Next
+    Next,
+
+    Restart
 }
