@@ -4,7 +4,7 @@ namespace GarageGroup.Infra.Bot.Builder;
 
 public static class BotContextExtensions
 {
-    public static ChatFlowStarter<TFlowStateJson> CreateChatFlow<TFlowStateJson>(this IBotContext botContext, string chatFlowId)
+    public static ChatFlowStarter<TFlowStateJson> GetChatFlowStarter<TFlowStateJson>(this IBotContext botContext, string chatFlowId)
     {
         ArgumentNullException.ThrowIfNull(botContext);
 
