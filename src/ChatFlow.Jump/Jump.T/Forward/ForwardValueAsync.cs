@@ -5,19 +5,18 @@ namespace GarageGroup.Infra.Bot.Builder;
 
 partial struct ChatFlowJump<T>
 {
-    public ValueTask<ChatFlowJump<TNextState>> ForwardValueAsync<TNextState>(
-        Func<T, ValueTask<ChatFlowJump<TNextState>>> nextAsync)
+    public ValueTask<ChatFlowJump<T>> ForwardValueAsync(
+        Func<T, ValueTask<ChatFlowJump<T>>> nextAsync)
         =>
         InnerForwardValueAsync(
             nextAsync ?? throw new ArgumentNullException(nameof(nextAsync)));
 
-    private ValueTask<ChatFlowJump<TNextState>> InnerForwardValueAsync<TNextState>(
-        Func<T, ValueTask<ChatFlowJump<TNextState>>> nextAsync)
+    private ValueTask<ChatFlowJump<T>> InnerForwardValueAsync(
+        Func<T, ValueTask<ChatFlowJump<T>>> nextAsync)
         =>
         Tag switch
         {
             ChatFlowJumpTag.Next => nextAsync.Invoke(nextState),
-            ChatFlowJumpTag.Repeat => new(new ChatFlowJump<TNextState>(repeatState)),
-            _ => new(new ChatFlowJump<TNextState>(breakState))
+            _ => new(this)
         };
 }

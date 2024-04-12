@@ -2,7 +2,7 @@ using System;
 
 namespace GarageGroup.Infra.Bot.Builder;
 
-public interface IChatFlowContext<T> : IFlowStateSupplier<T>, IChatFlowStepContext
+public interface IChatFlowContext<T> : IFlowStateSupplier<T>, IChatFlowStepContext<T>
 {
     string ChatFlowId { get; }
 

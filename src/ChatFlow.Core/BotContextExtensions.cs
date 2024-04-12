@@ -4,16 +4,16 @@ namespace GarageGroup.Infra.Bot.Builder;
 
 public static class BotContextExtensions
 {
-    public static ChatFlow CreateChatFlow(this IBotContext botContext, string chatFlowId)
+    public static ChatFlowStarter<TFlowStateJson> GetChatFlowStarter<TFlowStateJson>(this IBotContext botContext, string chatFlowId)
     {
         ArgumentNullException.ThrowIfNull(botContext);
 
-        return ChatFlow.InternalCreate(
-            botContext.TurnContext,
-            botContext.BotUserProvider,
-            botContext.ConversationState,
-            botContext.BotTelemetryClient,
-            botContext.LoggerFactory,
-            chatFlowId ?? string.Empty);
+        return new(
+            turnContext: botContext.TurnContext,
+            botUserProvider: botContext.BotUserProvider,
+            conversationState: botContext.ConversationState,
+            botTelemetryClient: botContext.BotTelemetryClient,
+            loggerFactory: botContext.LoggerFactory,
+            chatFlowId: chatFlowId ?? string.Empty);
     }
 }
