@@ -7,12 +7,12 @@ namespace GarageGroup.Infra.Bot.Builder;
 partial class ChatFlow<T>
 {
     public ChatFlow<T> MapFlowState(Func<T, CancellationToken, Task<T>> mapFlowStateAsync)
-        =>
-        InnerMapFlowState(
-            mapFlowStateAsync ?? throw new ArgumentNullException(nameof(mapFlowStateAsync)));
+    {
+        ArgumentNullException.ThrowIfNull(mapFlowStateAsync);
+        return InnerNext(InnerGetNextAsync);
 
-    private ChatFlow<T> InnerMapFlowState(Func<T, CancellationToken, Task<T>> mapFlowStateAsync)
-        =>
-        InnerNext(
-            (context, token) => mapFlowStateAsync.Invoke(context.FlowState, token));
+        Task<T> InnerGetNextAsync(IChatFlowContext<T> context, CancellationToken cancellationToken)
+            =>
+            mapFlowStateAsync.Invoke(context.FlowState, cancellationToken);
+    }
 }

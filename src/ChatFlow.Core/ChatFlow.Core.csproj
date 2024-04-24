@@ -8,12 +8,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RootNamespace>GarageGroup.Infra.Bot.Builder</RootNamespace>
     <AssemblyName>GarageGroup.Infra.Bot.Builder.ChatFlow.Core</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GarageGroup.Infra.Bot.Builder.ChatFlow.Jump" Version="0.2.0" />
-    <PackageReference Include="GarageGroup.Infra.Bot.Builder.Core" Version="0.2.0" />
+    <PackageReference Include="GarageGroup.Infra.Bot.Builder.Core" Version="0.3.0" />
   </ItemGroup>
 
 </Project>

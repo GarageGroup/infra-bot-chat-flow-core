@@ -5,30 +5,36 @@ namespace GarageGroup.Infra.Bot.Builder;
 partial class ChatFlow<T>
 {
     public ChatFlow<T> On(Func<IChatFlowContext<T>, Unit> on)
-        =>
-        InnerOn(
-            on ?? throw new ArgumentNullException(nameof(on)));
+    {
+        ArgumentNullException.ThrowIfNull(on);
+        return InnerOn(on);
+    }
 
     public ChatFlow<T> On(Action<IChatFlowContext<T>> on)
-        =>
-        InnerOn(
-            on ?? throw new ArgumentNullException(nameof(on)));
+    {
+        ArgumentNullException.ThrowIfNull(on);
+        return InnerOn(on);
+    }
 
     private ChatFlow<T> InnerOn(Func<IChatFlowContext<T>, Unit> on)
-        =>
-        InnerNext(
-            context =>
-            {
-                _ = on.Invoke(context);
-                return context.FlowState;
-            });
+    {
+        return InnerNext(InnerGetNext);
+
+        T InnerGetNext(IChatFlowContext<T> context)
+        {
+            _ = on.Invoke(context);
+            return context.FlowState;
+        }
+    }
 
     private ChatFlow<T> InnerOn(Action<IChatFlowContext<T>> on)
-        =>
-        InnerNext(
-            context =>
-            {
-                on.Invoke(context);
-                return context.FlowState;
-            });
+    {
+        return InnerNext(InnerGetNext);
+
+        T InnerGetNext(IChatFlowContext<T> context)
+        {
+            on.Invoke(context);
+            return context.FlowState;
+        }
+    }
 }
