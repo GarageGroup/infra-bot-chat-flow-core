@@ -7,30 +7,36 @@ namespace GarageGroup.Infra.Bot.Builder;
 partial class ChatFlow<T>
 {
     public ChatFlow<T> On(Func<IChatFlowContext<T>, CancellationToken, Task<Unit>> onAsync)
-        =>
-        InnerOn(
-            onAsync ?? throw new ArgumentNullException(nameof(onAsync)));
+    {
+        ArgumentNullException.ThrowIfNull(onAsync);
+        return InnerOn(onAsync);
+    }
 
     public ChatFlow<T> On(Func<IChatFlowContext<T>, CancellationToken, Task> onAsync)
-        =>
-        InnerOn(
-            onAsync ?? throw new ArgumentNullException(nameof(onAsync)));
+    {
+        ArgumentNullException.ThrowIfNull(onAsync);
+        return InnerOn(onAsync);
+    }
 
     private ChatFlow<T> InnerOn(Func<IChatFlowContext<T>, CancellationToken, Task<Unit>> onAsync)
-        =>
-        InnerNextValue(
-            async (context, token) =>
-            {
-                _ = await onAsync.Invoke(context, token).ConfigureAwait(false);
-                return context.FlowState;
-            });
+    {
+        return InnerNext(InnerGetNextAsync);
+
+        async Task<T> InnerGetNextAsync(IChatFlowContext<T> context, CancellationToken cancellationToken)
+        {
+            _ = await onAsync.Invoke(context, cancellationToken).ConfigureAwait(false);
+            return context.FlowState;
+        }
+    }
 
     private ChatFlow<T> InnerOn(Func<IChatFlowContext<T>, CancellationToken, Task> onAsync)
-        =>
-        InnerNextValue(
-            async (context, token) =>
-            {
-                await onAsync.Invoke(context, token).ConfigureAwait(false);
-                return context.FlowState;
-            });
+    {
+        return InnerNext(InnerGetNextAsync);
+
+        async Task<T> InnerGetNextAsync(IChatFlowContext<T> context, CancellationToken cancellationToken)
+        {
+            await onAsync.Invoke(context, cancellationToken).ConfigureAwait(false);
+            return context.FlowState;
+        }
+    }
 }
